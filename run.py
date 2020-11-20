@@ -7,9 +7,14 @@ from functools import wraps
 import sys
 import csv
 
-TOKEN_BOT, CHAT_PERMITIDO = (sys.argv[1], int(sys.argv[2])) if len(sys.argv) == 3 else (input("Token: "), input("ChatID: "))
+TOKEN_BOT, CHAT_PERMITIDO = (
+    (sys.argv[1], int(sys.argv[2]))
+    if len(sys.argv) == 3
+    else (input("Token: "), input("ChatID: "))
+)
 updater = Updater(token=TOKEN_BOT, use_context=True)
 dispatcher = updater.dispatcher
+
 
 def permissao(func):
     @wraps(func)
@@ -40,6 +45,7 @@ Id: {id_user}
 
     return wrapper
 
+
 # Bot faz o upload no chat de arquivo encontrado no diretório ./arquivos
 @permissao
 def arquivo(update, context):
@@ -59,6 +65,7 @@ def arquivo(update, context):
             chat_id=update.effective_chat.id, text=texto, parse_mode=ParseMode.HTML
         )
 
+
 # Pesquisa em um arquivo tsv e retorna a primeira e segunda coluna
 @permissao
 def pesquisa(update, context):
@@ -67,7 +74,9 @@ def pesquisa(update, context):
 
     for termo in termos:
         try:
-            arquivo = csv.reader(open("arquivos/planilha.tsv", "r", encoding="utf-8"), delimiter="\t")
+            arquivo = csv.reader(
+                open("arquivos/planilha.tsv", "r", encoding="utf-8"), delimiter="\t"
+            )
             for linha in arquivo:
                 for coluna in linha:
                     if termo in coluna:
@@ -78,10 +87,10 @@ def pesquisa(update, context):
 
     if texto:
         context.bot.send_message(
-                            chat_id=update.effective_chat.id,
-                            text=texto,
-                            parse_mode=ParseMode.HTML,
-                        )
+            chat_id=update.effective_chat.id,
+            text=texto,
+            parse_mode=ParseMode.HTML,
+        )
 
     else:
         texto = f"<b>Nada encontrado!</b>"
@@ -91,16 +100,21 @@ def pesquisa(update, context):
             parse_mode=ParseMode.HTML,
         )
 
+
 # Retorna os comandos disponíveis
 @permissao
 def comandos(update, context):
-    texto = "/arquivo <b>nome_do_arquivo.extensao</b> - Download arquivo<br>/pesquisa <b>termo</b> - Buscar em arquivo"""
+    texto = (
+        "/arquivo <b>nome_do_arquivo.extensao</b> - Download arquivo<br>/pesquisa <b>termo</b> - Buscar em arquivo"
+        ""
+    )
     context.bot.send_message(
         chat_id=update.effective_chat.id, text=texto, parse_mode=ParseMode.HTML
     )
 
-# * Precisa ser o último caso contrário será ativado antes de dar match em outro handler
-# Caso seja requisita um comando desconhecido, exibir mensagem
+
+# * Precisa ser o último a ser definido, caso contrário será ativado antes de outro comando
+# Caso seja requisitado um comando desconhecido, exibir mensagem
 @permissao
 def desconhecido(update, context):
     context.bot.send_message(
@@ -108,6 +122,7 @@ def desconhecido(update, context):
         text="<b>Comando inválido</b>\n/comandos -> lista de comandos",
         parse_mode=ParseMode.HTML,
     )
+
 
 dispatcher.add_handler(CommandHandler("arquivo", arquivo))
 dispatcher.add_handler(CommandHandler("pesquisa", pesquisa))
