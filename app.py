@@ -6,6 +6,15 @@ from os import listdir
 from functools import wraps
 import sys
 import csv
+import logging
+
+logging.basicConfig(
+    filename="app.log",
+    format="%(asctime)s [%(levelname)s]- %(message)s",
+    datefmt="%y-%m-%d %H:%M:%S",
+    level=logging.INFO,
+)
+logging.info("Iniciou a aplicação")
 
 TOKEN_BOT, CHAT_PERMITIDO = (
     (sys.argv[1], int(sys.argv[2]))
@@ -22,24 +31,18 @@ def permissao(func):
         nome = update.effective_user.full_name
         nick = update.effective_user.username
         id_user = update.effective_user.id
-        print(f"\n{nome} : {nick} : {id_user} - {func.__name__}\n")
 
         if update.effective_chat.id == CHAT_PERMITIDO:
+            logging.info(f"{nome} : {nick} : {id_user} - {func.__name__}")
             return func(update, context)
         else:
             texto = "Você não tem permissão!"
             context.bot.send_message(chat_id=update.effective_chat.id, text=texto)
+            logging.critical(
+                f"{nome} : {nick} : {id_user} - {func.__name__} Tentou acessar"
+            )
             print(
-                f"""###############################################
-###############################################
-###############################################
->>>    T E N T A T I V A d e A C E S S O    <<<
-Nome: {nome}
-Nick: {nick}
-Id: {id_user}
-###############################################
-###############################################
-###############################################"""
+                f"\n######################\nNome: {nome}\nNick: {nick}\nId: {id_user}\n######################\n"
             )
             return None
 
