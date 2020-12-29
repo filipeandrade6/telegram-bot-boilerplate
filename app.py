@@ -31,13 +31,15 @@ def permissao(func):
         nome = update.effective_user.full_name
         nick = update.effective_user.username
         id_user = update.effective_user.id
+        params = context.args
 
         if update.effective_chat.id == CHAT_PERMITIDO:
-            logging.info(f"{nome} : {nick} : {id_user} - {func.__name__}")
+            logging.info(f"{update.effective_chat.id} : {nome} : {nick} : {id_user} - {func.__name__} - {params}")
             return func(update, context)
         else:
             texto = "Você não tem permissão!"
             context.bot.send_message(chat_id=update.effective_chat.id, text=texto)
+            context.bot.send_message(chat_id=CHAT_PERMITIDO, text=f"{nome} : {nick} : {id_user} : {func.__name__} : {params}Tentou acessar fora do grupo!")
             logging.critical(
                 f"{nome} : {nick} : {id_user} - {func.__name__} Tentou acessar"
             )
